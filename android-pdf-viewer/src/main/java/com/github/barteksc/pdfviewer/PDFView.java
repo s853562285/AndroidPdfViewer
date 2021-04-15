@@ -244,9 +244,6 @@ public class PDFView extends RelativeLayout {
     /** Construct the initial view */
     public PDFView(Context context, AttributeSet set) {
         super(context, set);
-
-        renderingHandlerThread = new HandlerThread("PDF renderer");
-
         if (isInEditMode()) {
             return;
         }
@@ -412,7 +409,7 @@ public class PDFView extends RelativeLayout {
     }
 
     public void recycle() {
-        waitingDocumentConfigurator = null;
+//        waitingDocumentConfigurator = null;
 
         animationManager.stopAll();
         dragPinchManager.disable();
@@ -464,6 +461,7 @@ public class PDFView extends RelativeLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+//        Log.i(TAG,"onDetachedFromWindow");
         recycle();
         if (renderingHandlerThread != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -480,8 +478,12 @@ public class PDFView extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if(renderingHandlerThread==null){
-            renderingHandlerThread = new HandlerThread("PDF renderer");
+//        Log.i(TAG,"onAttachedToWindow  "+(waitingDocumentConfigurator == null));
+//        if(renderingHandlerThread==null){
+//            renderingHandlerThread = new HandlerThread("PDF renderer");
+//        }
+        if ((decodingAsyncTask==null||decodingAsyncTask.isCancelled())&&waitingDocumentConfigurator != null) {//view被重新添加时需要加载之前的pdf页
+            waitingDocumentConfigurator.load();
         }
     }
 
@@ -761,7 +763,9 @@ public class PDFView extends RelativeLayout {
         state = State.LOADED;
 
         this.pdfFile = pdfFile;
-
+        if(renderingHandlerThread==null){
+            renderingHandlerThread = new HandlerThread("PDF renderer");
+        }
         if (!renderingHandlerThread.isAlive()) {
             renderingHandlerThread.start();
         }
