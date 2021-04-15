@@ -478,7 +478,7 @@ public class PDFView extends RelativeLayout {
     
 
     @Override
-    protected void sd() {
+    protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if(renderingHandlerThread==null){
             renderingHandlerThread = new HandlerThread("PDF renderer");
